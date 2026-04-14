@@ -1,6 +1,6 @@
 import { Order } from '@/types/equipment';
 import { CountdownTimer } from './CountdownTimer';
-import { Phone, User, CreditCard } from 'lucide-react';
+import { Phone, User, CreditCard, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface RentedTabProps {
@@ -66,5 +66,3 @@ export function RentedTab({ orders, onComplete }: RentedTabProps) {
     </div>
   );
 }
-
-import { Clock } from 'lucide-react';
