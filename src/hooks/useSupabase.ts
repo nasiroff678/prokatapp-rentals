@@ -312,3 +312,21 @@ export function useExtendOrder() {
   });
 }
 
+export function useActionLogs() {
+  return useQuery({
+    queryKey: ['action_logs'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('action_logs')
+        .select(`
+          *,
+          staff (name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(100);
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+

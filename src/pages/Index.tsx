@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TabType, PaymentMethod } from '@/types/equipment';
 import { BottomNav } from '@/components/BottomNav';
@@ -33,6 +35,12 @@ const Index = () => {
   const isAdmin = currentStaff?.role === 'admin';
   const [activeTab, setActiveTab] = useState<TabType>('available');
   const logout = useAuthStore(state => state.logout);
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const { data: equipment = [], isLoading: EqLoading } = useEquipment();
   const { data: orders = [], isLoading: OrdersLoading } = useOrders();
@@ -85,21 +93,28 @@ const Index = () => {
       {/* Header */}
       <header className="sticky top-0 z-40 glass-header">
         <div className="flex items-center justify-between px-6 h-16 max-w-lg mx-auto">
-          <div className="flex items-center gap-2">
-            <h1 className="font-heading text-xl font-bold tracking-tight">
+          <div className="flex flex-col">
+            <h1 className="font-heading text-xl font-bold tracking-tight leading-none mb-1">
               <span className="text-primary drop-shadow-[0_0_8px_rgba(20,185,129,0.5)]">PROKAT</span>APP
             </h1>
+            <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-[0.1em]">
+              {format(now, 'HH:mm:ss')} • {format(now, 'd MMMM', { locale: ru })}
+            </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="flex flex-col items-end mr-2 hidden sm:flex">
+              <span className="text-[10px] text-muted-foreground font-medium">{currentStaff?.name}</span>
+              <span className="text-[8px] text-primary/70 uppercase font-bold tracking-tighter">{currentStaff?.role === 'admin' ? 'Администратор' : 'Сотрудник'}</span>
+            </div>
             <motion.span 
               key={activeTab}
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="font-heading text-[10px] text-muted-foreground tracking-[0.2em] uppercase font-medium bg-white/5 px-3 py-1 rounded-full border border-white/5"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="font-heading text-[10px] text-primary tracking-[0.1em] uppercase font-bold bg-primary/10 px-3 py-1 rounded-full border border-primary/20"
             >
               {tabTitles[activeTab]}
             </motion.span>
-            <Button variant="ghost" size="icon" onClick={logout} className="h-8 w-8 text-muted-foreground hover:text-white">
+            <Button variant="ghost" size="icon" onClick={logout} className="h-9 w-9 text-muted-foreground hover:text-white hover:bg-white/5 rounded-xl">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>

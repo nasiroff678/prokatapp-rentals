@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Equipment } from '@/types/equipment';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowUp, Plus, Package, QrCode, Printer, Pencil, Trash2 } from 'lucide-react';
+import { ArrowUp, Plus, Package, QrCode, Printer, Pencil, Trash2, Search, Inbox } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import {
   Dialog,
@@ -40,6 +40,7 @@ interface WarehouseTabProps {
 
 export function WarehouseTab({ equipment, onMoveToAvailable, onAddEquipment, onEditEquipment, onDeleteEquipment }: WarehouseTabProps) {
   const [showAdd, setShowAdd] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [newName, setNewName] = useState('');
   const [newCategory, setNewCategory] = useState('');
   const [newPrice, setNewPrice] = useState<string>('');
@@ -91,16 +92,32 @@ export function WarehouseTab({ equipment, onMoveToAvailable, onAddEquipment, onE
     setShowAdd(false);
   };
 
+  const filtered = equipment.filter(e => 
+    e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    e.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-3">
-      <Button
-        onClick={() => setShowAdd(!showAdd)}
-        variant="outline"
-        className="w-full border-dashed border-border text-muted-foreground gap-2"
-      >
-        <Plus className="w-4 h-4" />
-        Добавить оборудование
-      </Button>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Поиск по складу..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-secondary/50 border-white/5 h-11 rounded-xl focus:ring-primary/20"
+          />
+        </div>
+        <Button
+          onClick={() => setShowAdd(!showAdd)}
+          variant="outline"
+          className="border-dashed border-border text-muted-foreground gap-2 h-11 px-6 rounded-xl shrink-0"
+        >
+          <Plus className="w-4 h-4" />
+          Добавить
+        </Button>
+      </div>
 
       {/* Скрытый стиль для печати (показываем только QR при печати) */}
       <style>
@@ -152,13 +169,13 @@ export function WarehouseTab({ equipment, onMoveToAvailable, onAddEquipment, onE
         </div>
       )}
 
-      {equipment.length === 0 ? (
+      {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <Package className="w-12 h-12 mb-3 opacity-30" />
-          <p className="text-sm">Склад пуст</p>
+          <Inbox className="w-12 h-12 mb-3 opacity-20" />
+          <p className="text-sm">Ничего не найдено на складе</p>
         </div>
       ) : (
-        equipment.map(item => (
+        filtered.map(item => (
           <Dialog key={item.id}>
             <div className="glass-card p-4 flex items-center justify-between">
               <div className="flex-1 cursor-pointer">

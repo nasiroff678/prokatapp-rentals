@@ -58,8 +58,10 @@ export function OrderForm({ equipment, onSubmit, onCancel }: OrderFormProps) {
     setPhone(formatted);
   };
 
-  const calculatedTotal = equipment.pricePerHour * hours;
+  const calculatedTotal = (hours === 0.5 && equipment.pricePerHour === 500) ? 300 : Math.round(equipment.pricePerHour * hours);
   const currentTotal = customTotal !== null ? customTotal : calculatedTotal;
+
+  const isPriceAdjusted = hours === 0.5 && equipment.pricePerHour === 500 && customTotal === null;
 
   const handleStartTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newStart = e.target.value;
@@ -190,8 +192,13 @@ export function OrderForm({ equipment, onSubmit, onCancel }: OrderFormProps) {
           <Input type="file" accept="image/*" onChange={e => setDocumentFile(e.target.files?.[0])} className="bg-secondary border-border text-xs" />
         </div>
 
-        <div className="glass-card p-3 flex items-center justify-between">
-          <span className="text-sm text-muted-foreground whitespace-nowrap mr-4">Итого (₽)</span>
+        <div className="glass-card p-3 flex items-center justify-between bg-white/10 border-primary/20 neon-shadow-sm">
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground uppercase tracking-widest">Итого (₽)</span>
+            {isPriceAdjusted && (
+              <span className="text-[10px] text-primary/80 font-medium">Спец. цена 30м</span>
+            )}
+          </div>
           <Input 
             type="text"
             inputMode="numeric"
@@ -200,7 +207,7 @@ export function OrderForm({ equipment, onSubmit, onCancel }: OrderFormProps) {
               const val = e.target.value.replace(/\D/g, '');
               setCustomTotal(val === '' ? '' : Number(val));
             }} 
-            className="bg-secondary border-border font-heading font-bold text-primary text-right max-w-[150px]" 
+            className="bg-secondary/80 border-primary/20 font-heading font-bold text-primary text-right max-w-[150px] text-xl h-12" 
           />
         </div>
 

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Order } from '@/types/equipment';
 import { CountdownTimer } from './CountdownTimer';
-import { Phone, User, CreditCard, Clock, Activity, AlertCircle } from 'lucide-react';
+import { Phone, User, CreditCard, Clock, Activity, AlertCircle, Search, Inbox, Share2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,11 +23,18 @@ const paymentLabels: Record<string, string> = {
 };
 
 export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
+  const [searchQuery, setSearchQuery] = useState('');
   const [completingOrder, setCompletingOrder] = useState<Order | null>(null);
   const [penalty, setPenalty] = useState<number>(0);
   
   const [extendingOrder, setExtendingOrder] = useState<Order | null>(null);
   const [extraHours, setExtraHours] = useState<number>(1);
+
+  const filtered = orders.filter(o => 
+    o.equipmentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    o.customerPhone.includes(searchQuery)
+  );
 
   const handleCompleteDialog = (order: Order) => {
     setPenalty(0);
@@ -46,6 +55,12 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
     }
   };
 
+  const handleCopyOrder = (order: Order) => {
+    const text = `РЕНТАЛ: ${order.equipmentName}\nКлиент: ${order.customerName}\nТел: ${order.customerPhone}\nВремя: ${format(new Date(order.startTime), 'HH:mm')} - ${format(new Date(order.plannedEndTime), 'HH:mm')}\nЗалог: ${order.deposit}₽\nК оплате: ${order.totalPrice}₽`;
+    navigator.clipboard.writeText(text);
+    toast.success('Детали заказа скопированы');
+  };
+
   if (orders.length === 0) {
     return (
       <motion.div 
@@ -60,29 +75,46 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
   }
 
   return (
-    <motion.div 
-      initial="hidden"
-      animate="show"
-      variants={{
-        hidden: { opacity: 0 },
-        show: {
-          opacity: 1,
-          transition: {
-            staggerChildren: 0.1
+    <div className="space-y-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Поиск по активным арендам..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 bg-secondary/50 border-white/5 h-11 rounded-xl focus:ring-primary/20"
+        />
+      </div>
+
+      <motion.div 
+        initial="hidden"
+        animate="show"
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.1
+            }
           }
-        }
-      }}
-      className="space-y-4"
-    >
-      {orders.map(order => (
-        <motion.div 
-          variants={{
-            hidden: { opacity: 0, x: -10 },
-            show: { opacity: 1, x: 0 }
-          }}
-          key={order.id} 
-          className="glass-card p-5 relative overflow-hidden group"
-        >
+        }}
+        className="space-y-4"
+      >
+        {filtered.length === 0 ? (
+          <div className="py-20 text-center text-muted-foreground">
+            <Inbox className="w-12 h-12 mx-auto mb-3 opacity-20" />
+            <p className="text-sm">Ничего не найдено</p>
+          </div>
+        ) : (
+          filtered.map(order => (
+            <motion.div 
+              variants={{
+                hidden: { opacity: 0, x: -10 },
+                show: { opacity: 1, x: 0 }
+              }}
+              key={order.id} 
+              className="glass-card p-5 relative overflow-hidden group"
+            >
           {/* Active indicator line */}
           <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary neon-shadow" />
           
@@ -124,13 +156,22 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
 
           <div className="flex gap-2">
             <Button
+              onClick={() => handleCopyOrder(order)}
+              size="sm"
+              variant="outline"
+              className="flex-1 bg-white/5 text-foreground border border-border hover:bg-white/10 transition-all duration-300 font-medium uppercase tracking-widest text-[10px] h-10 rounded-xl"
+            >
+              <Share2 className="w-3.5 h-3.5 mr-1.5" />
+              Детали
+            </Button>
+            <Button
               onClick={() => {
                 setExtraHours(1);
                 setExtendingOrder(order);
               }}
               size="sm"
               variant="outline"
-              className="flex-1 bg-secondary/50 text-foreground border border-border hover:bg-secondary transition-all duration-300 font-medium uppercase tracking-widest text-[10px] h-10 rounded-xl"
+              className="flex-1 bg-white/5 text-foreground border border-border hover:bg-white/10 transition-all duration-300 font-medium uppercase tracking-widest text-[10px] h-10 rounded-xl"
             >
               Продлить
             </Button>
@@ -143,7 +184,9 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
             </Button>
           </div>
         </motion.div>
-      ))}
+          ))
+        )}
+      </motion.div>
 
       <Dialog open={!!completingOrder} onOpenChange={(open) => !open && setCompletingOrder(null)}>
         <DialogContent className="sm:max-w-md bg-background/95 backdrop-blur-xl border-border">
@@ -248,6 +291,6 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </motion.div>
+    </div>
   );
 }

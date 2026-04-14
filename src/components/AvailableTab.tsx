@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Equipment, PaymentMethod } from '@/types/equipment';
 import { OrderForm } from './OrderForm';
-import { ArrowRight, CheckCircle, Zap, Archive } from 'lucide-react';
+import { ArrowRight, CheckCircle, Zap, Archive, Search, Inbox } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { motion } from 'framer-motion';
 
 interface AvailableTabProps {
@@ -24,6 +25,12 @@ interface AvailableTabProps {
 
 export function AvailableTab({ equipment, onCreateOrder, onMoveToWarehouse }: AvailableTabProps) {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filtered = equipment.filter(e => 
+    e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    e.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   if (selectedEquipment) {
     return (
@@ -55,21 +62,38 @@ export function AvailableTab({ equipment, onCreateOrder, onMoveToWarehouse }: Av
   }
 
   return (
-    <motion.div 
-      initial="hidden"
-      animate="show"
-      variants={{
-        hidden: { opacity: 0 },
-        show: {
-          opacity: 1,
-          transition: {
-            staggerChildren: 0.05
+    <div className="space-y-4">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Поиск по названию или категории..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10 bg-secondary/50 border-white/5 h-11 rounded-xl focus:ring-primary/20"
+        />
+      </div>
+
+      <motion.div 
+        initial="hidden"
+        animate="show"
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.05
+            }
           }
-        }
-      }}
-      className="space-y-3"
-    >
-      {equipment.map(item => (
+        }}
+        className="space-y-3"
+      >
+        {filtered.length === 0 ? (
+          <div className="py-20 text-center text-muted-foreground">
+            <Inbox className="w-12 h-12 mx-auto mb-3 opacity-20" />
+            <p className="text-sm">Ничего не найдено</p>
+          </div>
+        ) : (
+          filtered.map(item => (
         <motion.div
           variants={{
             hidden: { opacity: 0, y: 10 },
@@ -120,7 +144,9 @@ export function AvailableTab({ equipment, onCreateOrder, onMoveToWarehouse }: Av
           {/* Subtle gradient shine on hover */}
           <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/[0.03] to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
         </motion.div>
-      ))}
-    </motion.div>
+          ))
+        )}
+      </motion.div>
+    </div>
   );
 }
