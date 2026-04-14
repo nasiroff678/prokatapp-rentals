@@ -8,6 +8,7 @@ export interface Equipment {
   category: string;
   status: EquipmentStatus;
   pricePerHour: number;
+  deposit?: number;
   image?: string;
 }
 
@@ -25,6 +26,7 @@ export interface Order {
   startTime: string; // ISO string
   endTime: string;   // ISO string
   status: 'active' | 'completed' | 'overdue';
+  documentImage?: string;
 }
 
 export interface DailyReport {

@@ -4,12 +4,14 @@ interface CountdownResult {
   hours: number;
   minutes: number;
   seconds: number;
+  seconds: number;
   isOverdue: boolean;
+  isStarted: boolean;
   totalSeconds: number;
   display: string;
 }
 
-export function useCountdown(endTime: string): CountdownResult {
+export function useCountdown(startTime: string, endTime: string): CountdownResult {
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -17,9 +19,12 @@ export function useCountdown(endTime: string): CountdownResult {
     return () => clearInterval(interval);
   }, []);
 
+  const start = new Date(startTime).getTime();
   const end = new Date(endTime).getTime();
-  const diff = end - now;
-  const isOverdue = diff <= 0;
+  const isStarted = now >= start;
+  const isOverdue = now >= end;
+  
+  const diff = !isStarted ? (end - start) : (end - now);
   const absDiff = Math.abs(diff);
 
   const totalSeconds = Math.floor(absDiff / 1000);
@@ -30,5 +35,5 @@ export function useCountdown(endTime: string): CountdownResult {
   const pad = (n: number) => n.toString().padStart(2, '0');
   const display = `${isOverdue ? '-' : ''}${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
-  return { hours, minutes, seconds, isOverdue, totalSeconds, display };
+  return { hours, minutes, seconds, isOverdue, isStarted, totalSeconds, display };
 }

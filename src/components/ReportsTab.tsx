@@ -1,16 +1,31 @@
 import { Order } from '@/types/equipment';
-import { BarChart3, TrendingUp, DollarSign, Clock } from 'lucide-react';
-import { useMemo } from 'react';
+import { BarChart3, TrendingUp, DollarSign, Clock, Calendar, X } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { isToday, isThisMonth, parseISO, format } from 'date-fns';
 
 interface ReportsTabProps {
   orders: Order[];
 }
 
+type Period = 'today' | 'month' | 'all';
+
 export function ReportsTab({ orders }: ReportsTabProps) {
+  const [period, setPeriod] = useState<Period>('today');
+  const [showDetails, setShowDetails] = useState(false);
+
   const stats = useMemo(() => {
-    const completed = orders.filter(o => o.status === 'completed');
-    const active = orders.filter(o => o.status === 'active');
-    const all = orders;
+    // Filter by period
+    const filteredOrders = orders.filter(o => {
+      if (period === 'all') return true;
+      const date = parseISO(o.createdAt || new Date().toISOString());
+      if (period === 'today') return isToday(date);
+      if (period === 'month') return isThisMonth(date);
+      return true;
+    });
+
+    const completed = filteredOrders.filter(o => o.status === 'completed');
+    const active = filteredOrders.filter(o => o.status === 'active');
+    const all = filteredOrders;
 
     const totalRevenue = all.reduce((sum, o) => sum + o.totalPrice, 0);
     const totalDeposits = active.reduce((sum, o) => sum + o.deposit, 0);
@@ -40,12 +55,13 @@ export function ReportsTab({ orders }: ReportsTabProps) {
       avgHours,
       topEquipment: topEquipment ? `${topEquipment[0]} (${topEquipment[1]})` : '—',
       paymentBreakdown,
+      filteredOrdersList: all,
     };
-  }, [orders]);
+  }, [orders, period]);
 
   const statCards = [
-    { label: 'Выручка', value: `${stats.totalRevenue.toLocaleString()} ₽`, icon: DollarSign, color: 'text-primary' },
-    { label: 'Заказов', value: stats.totalOrders, icon: TrendingUp, color: 'text-accent' },
+    { label: 'Выручка', value: `${stats.totalRevenue.toLocaleString()} ₽`, icon: DollarSign, color: 'text-primary', onClick: () => setShowDetails(true) },
+    { label: 'Заказов', value: stats.totalOrders, icon: TrendingUp, color: 'text-accent', onClick: () => setShowDetails(true) },
     { label: 'Активных', value: stats.activeOrders, icon: Clock, color: 'text-timer-warning' },
     { label: 'Ср. время', value: `${stats.avgHours} ч`, icon: BarChart3, color: 'text-muted-foreground' },
   ];
@@ -55,9 +71,28 @@ export function ReportsTab({ orders }: ReportsTabProps) {
 
   return (
     <div className="space-y-4">
+      {/* Date Filter */}
+      <div className="flex bg-secondary p-1 rounded-xl">
+        {(['today', 'month', 'all'] as const).map(p => (
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={`flex-1 py-1.5 text-xs font-medium rounded-lg transition-all ${
+              period === p ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {p === 'today' ? 'За сегодня' : p === 'month' ? 'За месяц' : 'За всё время'}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
-        {statCards.map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="glass-card p-4">
+        {statCards.map(({ label, value, icon: Icon, color, onClick }) => (
+          <div 
+            key={label} 
+            className={`glass-card p-4 ${onClick ? 'cursor-pointer hover:bg-white/5 transition-colors active:scale-95' : ''}`}
+            onClick={onClick}
+          >
             <div className="flex items-center gap-2 mb-2">
               <Icon className={`w-4 h-4 ${color}`} />
               <span className="text-xs text-muted-foreground">{label}</span>
@@ -96,6 +131,35 @@ export function ReportsTab({ orders }: ReportsTabProps) {
         <div className="glass-card p-4">
           <h3 className="font-heading text-xs text-muted-foreground mb-1">ЗАЛОГИ В ОБОРОТЕ</h3>
           <p className="font-heading text-xl font-bold text-warning">{stats.totalDeposits.toLocaleString()} ₽</p>
+        </div>
+      )}
+
+      {showDetails && (
+        <div className="fixed inset-0 z-[70] bg-background/95 backdrop-blur-sm flex flex-col pb-20">
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <h2 className="font-heading text-base font-semibold">Список заказов</h2>
+            <button onClick={() => setShowDetails(false)} className="p-1 text-muted-foreground hover:text-white">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-auto p-4 space-y-3">
+             {stats.filteredOrdersList.length === 0 ? (
+               <p className="text-center text-sm text-muted-foreground py-10">Нет заказов в этом периоде</p>
+             ) : (
+               stats.filteredOrdersList.map(o => (
+                 <div key={o.id} className="glass-card p-3 flex flex-col gap-1">
+                   <div className="flex justify-between items-start">
+                     <p className="text-sm font-semibold">{o.equipmentName}</p>
+                     <p className="font-heading text-primary font-bold">{o.totalPrice} ₽</p>
+                   </div>
+                   <p className="text-xs text-muted-foreground flex justify-between">
+                     <span>{o.customerName} ({paymentLabels[o.paymentMethod]})</span>
+                     <span>{format(new Date(o.startTime), 'dd.MM.yyyy HH:mm')}</span>
+                   </p>
+                 </div>
+               ))
+             )}
+          </div>
         </div>
       )}
     </div>

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Equipment, PaymentMethod } from '@/types/equipment';
 import { OrderForm } from './OrderForm';
-import { ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle, Zap, Archive } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface AvailableTabProps {
   equipment: Equipment[];
@@ -12,18 +14,23 @@ interface AvailableTabProps {
     rentalHours: number,
     deposit: number,
     paymentMethod: PaymentMethod,
+    documentFile: File | undefined,
+    totalPrice: number,
+    startTime: string,
+    endTime: string
   ) => void;
+  onMoveToWarehouse?: (id: string) => void;
 }
 
-export function AvailableTab({ equipment, onCreateOrder }: AvailableTabProps) {
+export function AvailableTab({ equipment, onCreateOrder, onMoveToWarehouse }: AvailableTabProps) {
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
 
   if (selectedEquipment) {
     return (
       <OrderForm
         equipment={selectedEquipment}
-        onSubmit={(eqId, name, phone, hours, deposit, payment) => {
-          onCreateOrder(eqId, name, phone, hours, deposit, payment);
+        onSubmit={(eqId, name, phone, hours, deposit, payment, documentFile, totalPrice, startTime, endTime) => {
+          onCreateOrder(eqId, name, phone, hours, deposit, payment, documentFile, totalPrice, startTime, endTime);
           setSelectedEquipment(null);
         }}
         onCancel={() => setSelectedEquipment(null)}
@@ -33,28 +40,87 @@ export function AvailableTab({ equipment, onCreateOrder }: AvailableTabProps) {
 
   if (equipment.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <CheckCircle className="w-12 h-12 mb-3 opacity-30" />
-        <p className="text-sm">Всё оборудование занято или на складе</p>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="flex flex-col items-center justify-center py-24 text-muted-foreground"
+      >
+        <div className="relative mb-4">
+          <CheckCircle className="w-16 h-16 opacity-10" />
+          <Zap className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-primary opacity-50" />
+        </div>
+        <p className="text-sm font-medium">Всё оборудование занято</p>
+      </motion.div>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <motion.div 
+      initial="hidden"
+      animate="show"
+      variants={{
+        hidden: { opacity: 0 },
+        show: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.05
+          }
+        }
+      }}
+      className="space-y-3"
+    >
       {equipment.map(item => (
-        <button
+        <motion.div
+          variants={{
+            hidden: { opacity: 0, y: 10 },
+            show: { opacity: 1, y: 0 }
+          }}
           key={item.id}
-          onClick={() => setSelectedEquipment(item)}
-          className="glass-card p-4 w-full text-left flex items-center justify-between group transition-colors hover:border-primary/30"
+          className="glass-card p-4 w-full flex items-center justify-between group relative overflow-hidden transition-all"
         >
-          <div>
-            <h3 className="font-heading text-sm font-semibold">{item.name}</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">{item.category} · {item.pricePerHour} ₽/час</p>
+          <div 
+            className="relative z-10 flex items-center gap-4 flex-1 cursor-pointer" 
+            onClick={() => setSelectedEquipment(item)}
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+              <Zap className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-heading text-base font-semibold tracking-tight">{item.name}</h3>
+              <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+                {item.category} <span className="mx-1 text-primary/40">·</span> {item.pricePerHour} ₽/час
+              </p>
+            </div>
           </div>
-          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
-        </button>
+          
+          <div className="relative z-10 flex items-center gap-2">
+            {onMoveToWarehouse && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMoveToWarehouse(item.id);
+                }}
+                className="h-8 w-8 text-muted-foreground hover:bg-white/5 hover:text-warning"
+                title="Убрать на склад"
+              >
+                <Archive className="w-4 h-4" />
+              </Button>
+            )}
+            <Button
+              size="icon"
+              onClick={() => setSelectedEquipment(item)}
+              className="h-8 w-8 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+            >
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+          
+          {/* Subtle gradient shine on hover */}
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/[0.03] to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 pointer-events-none" />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

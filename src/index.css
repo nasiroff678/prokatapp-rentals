@@ -2,65 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
-
 @layer base {
   :root {
-    --background: 220 20% 10%;
-    --foreground: 210 20% 92%;
+    /* Deep Blue Background */
+    --background: 222 47% 4%;
+    --foreground: 210 40% 98%;
 
-    --card: 220 18% 14%;
-    --card-foreground: 210 20% 92%;
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 220 18% 14%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 222 47% 6%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 25 95% 55%;
-    --primary-foreground: 0 0% 100%;
+    /* Neon Green Primary */
+    --primary: 142 71% 45%;
+    --primary-foreground: 222 47% 4%;
 
-    --secondary: 220 16% 20%;
-    --secondary-foreground: 210 20% 85%;
+    --secondary: 222 47% 12%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 14% 18%;
-    --muted-foreground: 215 12% 55%;
+    --muted: 222 47% 10%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 160 60% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 142 71% 45%;
+    --accent-foreground: 222 47% 4%;
 
-    --destructive: 0 72% 55%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 220 14% 22%;
-    --input: 220 14% 22%;
-    --ring: 25 95% 55%;
+    --border: 222 47% 15%;
+    --input: 222 47% 15%;
+    --ring: 142 71% 45%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --success: 160 60% 45%;
-    --success-foreground: 0 0% 100%;
-    --warning: 45 93% 55%;
-    --warning-foreground: 0 0% 10%;
-    --timer: 0 85% 60%;
-    --timer-warning: 45 93% 55%;
-    --timer-ok: 160 60% 45%;
+    --success: 142 71% 45%;
+    --success-foreground: 222 47% 4%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 4%;
+    --timer: 0 84% 60%;
+    --timer-warning: 38 92% 50%;
+    --timer-ok: 142 71% 45%;
 
-    --sidebar-background: 220 20% 10%;
-    --sidebar-foreground: 210 20% 92%;
-    --sidebar-primary: 25 95% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 16% 20%;
-    --sidebar-accent-foreground: 210 20% 92%;
-    --sidebar-border: 220 14% 22%;
-    --sidebar-ring: 25 95% 55%;
-
-    --font-heading: 'JetBrains Mono', monospace;
-    --font-body: 'Inter', sans-serif;
+    --font-heading: 'Instrument Serif', serif;
+    --font-body: 'DM Sans', sans-serif;
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border selection:bg-primary/30;
   }
 
   body {
@@ -68,27 +59,45 @@
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-image: radial-gradient(circle at 50% 0%, hsla(142, 71%, 45%, 0.05) 0%, transparent 50%);
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    @apply tracking-tight;
   }
 }
 
 @layer utilities {
-  .glass-card {
-    @apply bg-card/80 backdrop-blur-md border border-border/50 rounded-xl;
+  .glass-header {
+    @apply bg-background/60 backdrop-blur-xl border-b border-white/5;
   }
 
-  .status-badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl;
+  }
+
+  .neon-shadow {
+    box-shadow: 0 0 20px -5px hsla(var(--primary), 0.3);
+  }
+
+  .grain {
+    position: relative;
+  }
+
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3col%3e%3cfilter id='noiseFilter'%3e%3cfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3e%3c/svg%3e");
+    z-index: 50;
   }
 
   .tab-active {
-    @apply text-primary;
-  }
-
-  .tab-inactive {
-    @apply text-muted-foreground;
+    @apply text-primary neon-shadow;
   }
 }
