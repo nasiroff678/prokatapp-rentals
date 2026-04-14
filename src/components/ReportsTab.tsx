@@ -218,7 +218,7 @@ export function ReportsTab({ orders }: ReportsTabProps) {
                 <div className="space-y-1">
                   <p className="text-sm font-medium leading-tight">{log.description}</p>
                   <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                    <span className="text-primary/70">{(log.staff as any)?.name || 'Система'}</span>
+                    <span className="text-primary/70">{(log.staff as { name: string } | null)?.name || 'Система'}</span>
                     <span>•</span>
                     <span>{format(new Date(log.created_at), 'dd.MM HH:mm:ss')}</span>
                   </div>
