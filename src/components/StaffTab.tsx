@@ -97,7 +97,7 @@ export function StaffTab() {
             placeholder="Поиск сотрудников..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-secondary/50 border-white/5 h-11 rounded-xl focus:ring-primary/20"
+            className="pl-10 bg-secondary border-white/5 h-11 rounded-xl focus:ring-primary/20"
           />
         </div>
         <Button
@@ -180,14 +180,14 @@ export function StaffTab() {
                 value={name} 
                 onChange={e => setName(e.target.value)} 
                 placeholder="Например: Иван Иванов" 
-                className="bg-secondary/50 border-white/5 h-11 rounded-xl" 
+                className="bg-secondary border-white/5 h-11 rounded-xl" 
               />
             </div>
             
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground px-1 uppercase tracking-wider">Роль в системе</label>
               <Select value={role} onValueChange={(val: 'admin' | 'staff') => setRole(val)}>
-                <SelectTrigger className="bg-secondary/50 border-white/5 h-11 rounded-xl">
+                <SelectTrigger className="bg-secondary border-white/5 h-11 rounded-xl">
                   <SelectValue placeholder="Выберите роль" />
                 </SelectTrigger>
                 <SelectContent className="bg-background/95 backdrop-blur-xl border-border border-white/10 rounded-xl">
@@ -233,13 +233,13 @@ export function StaffTab() {
           <div className="space-y-4 pt-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground px-1 uppercase tracking-wider">ФИО / Имя</label>
-              <Input value={name} onChange={e => setName(e.target.value)} className="bg-secondary/50 border-white/5 h-11 rounded-xl" />
+              <Input value={name} onChange={e => setName(e.target.value)} className="bg-secondary border-white/5 h-11 rounded-xl" />
             </div>
             
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground px-1 uppercase tracking-wider">Роль</label>
               <Select value={role} onValueChange={(val: 'admin' | 'staff') => setRole(val)}>
-                <SelectTrigger className="bg-secondary/50 border-white/5 h-11 rounded-xl">
+                <SelectTrigger className="bg-secondary border-white/5 h-11 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-background/95 backdrop-blur-xl border-border">

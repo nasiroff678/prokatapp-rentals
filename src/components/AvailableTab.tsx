@@ -69,7 +69,7 @@ export function AvailableTab({ equipment, onCreateOrder, onMoveToWarehouse }: Av
           placeholder="Поиск по названию или категории..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 bg-secondary/50 border-border/50 h-11 rounded-xl focus:ring-primary/20"
+          className="pl-10 bg-secondary border-border/50 h-11 rounded-xl focus:ring-primary/20"
         />
       </div>
 

@@ -82,7 +82,7 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
           placeholder="Поиск по активным арендам..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 bg-secondary/50 border-border/50 h-11 rounded-xl focus:ring-primary/20"
+          className="pl-10 bg-secondary border-border/50 h-11 rounded-xl focus:ring-primary/20"
         />
       </div>
 

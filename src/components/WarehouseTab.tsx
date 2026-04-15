@@ -114,7 +114,7 @@ export function WarehouseTab({
             placeholder="Поиск по складу..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-secondary/50 border-white/5 h-11 rounded-xl focus:ring-primary/20"
+            className="pl-10 bg-secondary border-white/5 h-11 rounded-xl focus:ring-primary/20"
           />
         </div>
         {isAdmin && (
