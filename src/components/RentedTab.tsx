@@ -82,7 +82,7 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
           placeholder="Поиск по активным арендам..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 bg-secondary/50 border-white/5 h-11 rounded-xl focus:ring-primary/20"
+          className="pl-10 bg-secondary/50 border-border/50 h-11 rounded-xl focus:ring-primary/20"
         />
       </div>
 
@@ -140,7 +140,7 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-[11px] text-muted-foreground mb-4 bg-white/5 p-3 rounded-xl border border-white/5">
+          <div className="grid grid-cols-2 gap-4 text-[11px] text-muted-foreground mb-4 bg-foreground/5 p-3 rounded-xl border border-border/50">
             <div className="space-y-1">
               <p className="uppercase tracking-wider opacity-50">Оплата</p>
               <div className="flex items-center gap-1.5 text-foreground font-medium">
@@ -273,7 +273,7 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
                 </div>
               </div>
 
-              <div className="bg-white/5 border border-white/5 rounded-xl p-4 text-center">
+              <div className="bg-foreground/5 border border-border/50 rounded-xl p-4 text-center">
                 <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">К доплате</p>
                 <p className="text-2xl font-heading font-bold text-primary">
                   {extendingOrder.pricePerHour * extraHours} ₽

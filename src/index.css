@@ -4,7 +4,50 @@
 
 @layer base {
   :root {
-    /* Deep Blue Background */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 4%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 4%;
+
+    /* Neon Green Primary - adjusted for better contrast in light mode if needed, but keeping original hue */
+    --primary: 142 71% 45%;
+    --primary-foreground: 222 47% 4%;
+
+    --secondary: 210 40% 92%;
+    --secondary-foreground: 222 47% 4%;
+
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 25% 40%;
+
+    --accent: 142 71% 45%;
+    --accent-foreground: 222 47% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 142 71% 45%;
+
+    --radius: 1rem;
+
+    --success: 142 71% 45%;
+    --success-foreground: 222 47% 4%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 4%;
+    --timer: 0 84% 60%;
+    --timer-warning: 38 92% 50%;
+    --timer-ok: 142 71% 45%;
+
+    --font-heading: 'Instrument Serif', serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  .dark {
     --background: 222 47% 4%;
     --foreground: 210 40% 98%;
 
@@ -14,7 +57,6 @@
     --popover: 222 47% 6%;
     --popover-foreground: 210 40% 98%;
 
-    /* Neon Green Primary */
     --primary: 142 71% 45%;
     --primary-foreground: 222 47% 4%;
 
@@ -34,8 +76,6 @@
     --input: 222 47% 15%;
     --ring: 142 71% 45%;
 
-    --radius: 1rem;
-
     --success: 142 71% 45%;
     --success-foreground: 222 47% 4%;
     --warning: 38 92% 50%;
@@ -43,9 +83,6 @@
     --timer: 0 84% 60%;
     --timer-warning: 38 92% 50%;
     --timer-ok: 142 71% 45%;
-
-    --font-heading: 'Instrument Serif', serif;
-    --font-body: 'DM Sans', sans-serif;
   }
 }
 
@@ -70,11 +107,11 @@
 
 @layer utilities {
   .glass-header {
-    @apply bg-background/60 backdrop-blur-xl border-b border-white/5;
+    @apply bg-background/60 backdrop-blur-xl border-b border-border/50;
   }
 
   .glass-card {
-    @apply bg-white/[0.03] backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl;
+    @apply bg-card/40 backdrop-blur-lg border border-border/50 rounded-2xl shadow-xl dark:shadow-2xl dark:bg-white/[0.03] dark:border-white/10;
   }
 
   .neon-shadow {

@@ -69,7 +69,7 @@ export function AvailableTab({ equipment, onCreateOrder, onMoveToWarehouse }: Av
           placeholder="Поиск по названию или категории..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 bg-secondary/50 border-white/5 h-11 rounded-xl focus:ring-primary/20"
+          className="pl-10 bg-secondary/50 border-border/50 h-11 rounded-xl focus:ring-primary/20"
         />
       </div>
 
@@ -126,7 +126,7 @@ export function AvailableTab({ equipment, onCreateOrder, onMoveToWarehouse }: Av
                   e.stopPropagation();
                   onMoveToWarehouse(item.id);
                 }}
-                className="h-8 w-8 text-muted-foreground hover:bg-white/5 hover:text-warning"
+                className="h-8 w-8 text-muted-foreground hover:bg-foreground/5 hover:text-warning"
                 title="Убрать на склад"
               >
                 <Archive className="w-4 h-4" />

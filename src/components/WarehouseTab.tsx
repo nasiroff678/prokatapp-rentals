@@ -32,13 +32,21 @@ const CATEGORIES = [
 
 interface WarehouseTabProps {
   equipment: Equipment[];
+  isAdmin?: boolean;
   onMoveToAvailable: (id: string) => void;
   onAddEquipment: (name: string, category: string, pricePerHour: number, deposit: number, imageFile?: File | undefined) => void;
   onEditEquipment: (id: string, name: string, category: string, pricePerHour: number, deposit: number) => void;
   onDeleteEquipment: (id: string) => void;
 }
 
-export function WarehouseTab({ equipment, onMoveToAvailable, onAddEquipment, onEditEquipment, onDeleteEquipment }: WarehouseTabProps) {
+export function WarehouseTab({ 
+  equipment, 
+  isAdmin = false, 
+  onMoveToAvailable, 
+  onAddEquipment, 
+  onEditEquipment, 
+  onDeleteEquipment 
+}: WarehouseTabProps) {
   const [showAdd, setShowAdd] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [newName, setNewName] = useState('');
@@ -109,14 +117,16 @@ export function WarehouseTab({ equipment, onMoveToAvailable, onAddEquipment, onE
             className="pl-10 bg-secondary/50 border-white/5 h-11 rounded-xl focus:ring-primary/20"
           />
         </div>
-        <Button
-          onClick={() => setShowAdd(!showAdd)}
-          variant="outline"
-          className="border-dashed border-border text-muted-foreground gap-2 h-11 px-6 rounded-xl shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          Добавить
-        </Button>
+        {isAdmin && (
+          <Button
+            onClick={() => setShowAdd(!showAdd)}
+            variant="outline"
+            className="border-dashed border-border text-muted-foreground gap-2 h-11 px-6 rounded-xl shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            Добавить
+          </Button>
+        )}
       </div>
 
       {/* Скрытый стиль для печати (показываем только QR при печати) */}
@@ -183,21 +193,25 @@ export function WarehouseTab({ equipment, onMoveToAvailable, onAddEquipment, onE
                 <p className="text-xs text-muted-foreground mt-0.5">{item.category} · {item.pricePerHour} ₽/час</p>
               </div>
               <div className="flex items-center gap-1 sm:gap-2">
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  onClick={() => {
-                    if (window.confirm('Вы уверены, что хотите удалить это оборудование? Это действие необратимо.')) {
-                      onDeleteEquipment(item.id);
-                    }
-                  }} 
-                  className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-                <Button size="icon" variant="ghost" onClick={() => handleOpenEdit(item)} className="h-8 w-8 text-muted-foreground hover:text-white">
-                  <Pencil className="h-4 w-4" />
-                </Button>
+                {isAdmin && (
+                  <>
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      onClick={() => {
+                        if (window.confirm('Вы уверены, что хотите удалить это оборудование? Это действие необратимо.')) {
+                          onDeleteEquipment(item.id);
+                        }
+                      }} 
+                      className="h-8 w-8 text-destructive hover:text-destructive/80 hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => handleOpenEdit(item)} className="h-8 w-8 text-muted-foreground hover:text-white">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </>
+                )}
                 <DialogTrigger asChild>
                   <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground hover:text-white">
                     <QrCode className="h-4 w-4" />

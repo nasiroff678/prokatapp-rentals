@@ -1,5 +1,5 @@
 import { TabType } from '@/types/equipment';
-import { Clock, CheckCircle, Package, BarChart3 } from 'lucide-react';
+import { Clock, CheckCircle, Package, BarChart3, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface BottomNavProps {
@@ -16,10 +16,11 @@ const tabs: { id: TabType; label: string; icon: typeof Clock }[] = [
   { id: 'available', label: 'Свободные', icon: CheckCircle },
   { id: 'warehouse', label: 'Склад', icon: Package },
   { id: 'reports', label: 'Отчёты', icon: BarChart3 },
+  { id: 'staff', label: 'Персонал', icon: Users },
 ];
 
 export function BottomNav({ activeTab, onTabChange, rentedCount, availableCount, warehouseCount, isAdmin = false }: BottomNavProps) {
-  const visibleTabs = tabs.filter(t => isAdmin || (t.id !== 'warehouse' && t.id !== 'reports'));
+  const visibleTabs = tabs.filter(t => isAdmin || (t.id !== 'reports' && t.id !== 'staff'));
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass-header safe-area-bottom">

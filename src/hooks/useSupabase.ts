@@ -7,6 +7,14 @@ import { Database } from '@/integrations/supabase/types';
 
 type DbEquipment = Database['public']['Tables']['equipment']['Row'];
 type DbOrder = Database['public']['Tables']['orders']['Row'];
+type DbStaff = Database['public']['Tables']['staff']['Row'];
+
+export interface Staff {
+  id: string;
+  name: string;
+  role: 'admin' | 'staff';
+  pin_code: string;
+}
 
 // Mapper functions
 const mapEquipment = (data: DbEquipment): Equipment => ({
@@ -41,6 +49,7 @@ const mapOrder = (data: DbOrder & { equipment?: { name: string } }): Order => ({
 export const keys = {
   equipment: ['equipment'] as const,
   orders: ['orders'] as const,
+  staff: ['staff'] as const,
 };
 
 // --- EQUIPMENT HOOKS ---
@@ -327,6 +336,70 @@ export function useActionLogs() {
       if (error) throw error;
       return data;
     },
+  });
+}
+
+// --- STAFF HOOKS ---
+
+export function useStaff() {
+  return useQuery({
+    queryKey: keys.staff,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('staff').select('*').order('name');
+      if (error) throw error;
+      return data as Staff[];
+    },
+  });
+}
+
+export function useAddStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (newStaff: Omit<Staff, 'id'>) => {
+      const { data, error } = await supabase.from('staff').insert(newStaff).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.staff });
+      toast.success('Сотрудник добавлен');
+    },
+    onError: (error) => toast.error('Ошибка добавления: ' + error.message),
+  });
+}
+
+export function useUpdateStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (updatedStaff: Staff) => {
+      const { data, error } = await supabase.from('staff').update({
+        name: updatedStaff.name,
+        role: updatedStaff.role,
+        pin_code: updatedStaff.pin_code,
+      }).eq('id', updatedStaff.id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.staff });
+      toast.success('Данные сотрудника обновлены');
+    },
+    onError: (error) => toast.error('Ошибка обновления: ' + error.message),
+  });
+}
+
+export function useDeleteStaff() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('staff').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.staff });
+      toast.success('Сотрудник удален');
+    },
+    onError: (error) => toast.error('Ошибка удаления: ' + error.message),
   });
 }
 

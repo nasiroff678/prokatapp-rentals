@@ -8,6 +8,7 @@ import { RentedTab } from '@/components/RentedTab';
 import { AvailableTab } from '@/components/AvailableTab';
 import { WarehouseTab } from '@/components/WarehouseTab';
 import { ReportsTab } from '@/components/ReportsTab';
+import { StaffTab } from '@/components/StaffTab';
 import { useAuthStore } from '@/store/useAuthStore';
 import { 
   useEquipment, 
@@ -22,12 +23,14 @@ import {
 } from '@/hooks/useSupabase';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ModeToggle } from '@/components/ModeToggle';
 
 const tabTitles: Record<TabType, string> = {
   rented: 'Занятые',
   available: 'Свободные',
   warehouse: 'Склад',
   reports: 'Отчёты',
+  staff: 'Персонал',
 };
 
 const Index = () => {
@@ -114,7 +117,8 @@ const Index = () => {
             >
               {tabTitles[activeTab]}
             </motion.span>
-            <Button variant="ghost" size="icon" onClick={logout} className="h-9 w-9 text-muted-foreground hover:text-white hover:bg-white/5 rounded-xl">
+            <ModeToggle />
+            <Button variant="ghost" size="icon" onClick={logout} className="h-9 w-9 text-muted-foreground hover:text-foreground dark:hover:text-white hover:bg-foreground/5 dark:hover:bg-white/5 rounded-xl">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
@@ -153,9 +157,10 @@ const Index = () => {
                   onMoveToWarehouse={(id) => updateStatus({ id, status: 'warehouse' })}
                 />
               )}
-              {activeTab === 'warehouse' && isAdmin && (
+              {activeTab === 'warehouse' && (
                 <WarehouseTab
                   equipment={warehouseEquipment}
+                  isAdmin={isAdmin}
                   onMoveToAvailable={(id) => updateStatus({ id, status: 'available' })}
                   onAddEquipment={(name, category, pricePerHour, deposit, imageFile) => addEq({ name, category, pricePerHour, deposit, imageFile, status: 'warehouse' })}
                   onEditEquipment={(id, name, category, pricePerHour, deposit) => editEq({ id, name, category, pricePerHour, deposit })}
@@ -164,6 +169,9 @@ const Index = () => {
               )}
               {activeTab === 'reports' && isAdmin && (
                 <ReportsTab orders={orders} />
+              )}
+              {activeTab === 'staff' && isAdmin && (
+                <StaffTab />
               )}
             </motion.div>
           </AnimatePresence>
