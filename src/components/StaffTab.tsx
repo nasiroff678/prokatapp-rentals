@@ -186,7 +186,7 @@ export function StaffTab() {
             
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground px-1 uppercase tracking-wider">Роль в системе</label>
-              <Select value={role} onValueChange={(val: any) => setRole(val)}>
+              <Select value={role} onValueChange={(val: 'admin' | 'staff') => setRole(val)}>
                 <SelectTrigger className="bg-secondary/50 border-white/5 h-11 rounded-xl">
                   <SelectValue placeholder="Выберите роль" />
                 </SelectTrigger>
@@ -238,7 +238,7 @@ export function StaffTab() {
             
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground px-1 uppercase tracking-wider">Роль</label>
-              <Select value={role} onValueChange={(val: any) => setRole(val)}>
+              <Select value={role} onValueChange={(val: 'admin' | 'staff') => setRole(val)}>
                 <SelectTrigger className="bg-secondary/50 border-white/5 h-11 rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
