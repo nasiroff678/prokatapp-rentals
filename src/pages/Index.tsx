@@ -172,7 +172,7 @@ const Index = () => {
               {activeTab === 'reports' && isAdmin && (
                 <ReportsTab orders={orders} />
               )}
-              {activeTab === 'shift' && !isAdmin && (
+              {activeTab === 'shift' && (
                 <ShiftTab orders={orders} />
               )}
               {activeTab === 'staff' && isAdmin && (
