@@ -38,4 +38,4 @@ export interface DailyReport {
   topEquipment: string;
 }
 
-export type TabType = 'rented' | 'available' | 'warehouse' | 'reports' | 'staff';
+export type TabType = 'rented' | 'available' | 'warehouse' | 'reports' | 'staff' | 'shift';
