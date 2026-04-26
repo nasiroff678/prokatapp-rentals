@@ -31,6 +31,7 @@ const tabTitles: Record<TabType, string> = {
   warehouse: 'Склад',
   reports: 'Отчёты',
   staff: 'Персонал',
+  shift: 'Смена',
 };
 
 const Index = () => {
