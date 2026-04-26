@@ -22,7 +22,7 @@ export function ReportsTab({ orders }: ReportsTabProps) {
     // Filter by period
     const filteredOrders = orders.filter(o => {
       if (period === 'all') return true;
-      const date = parseISO(o.createdAt || new Date().toISOString());
+      const date = parseISO(o.startTime || new Date().toISOString());
       if (period === 'today') return isToday(date);
       if (period === 'month') return isThisMonth(date);
       return true;
