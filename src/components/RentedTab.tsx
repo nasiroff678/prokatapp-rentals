@@ -56,7 +56,7 @@ export function RentedTab({ orders, onComplete, onExtend }: RentedTabProps) {
   };
 
   const handleCopyOrder = (order: Order) => {
-    const text = `РЕНТАЛ: ${order.equipmentName}\nКлиент: ${order.customerName}\nТел: ${order.customerPhone}\nВремя: ${format(new Date(order.startTime), 'HH:mm')} - ${format(new Date(order.plannedEndTime), 'HH:mm')}\nЗалог: ${order.deposit}₽\nК оплате: ${order.totalPrice}₽`;
+    const text = `РЕНТАЛ: ${order.equipmentName}\nКлиент: ${order.customerName}\nТел: ${order.customerPhone}\nВремя: ${format(new Date(order.startTime), 'HH:mm')} - ${format(new Date(order.endTime), 'HH:mm')}\nЗалог: ${order.deposit}₽\nК оплате: ${order.totalPrice}₽`;
     navigator.clipboard.writeText(text);
     toast.success('Детали заказа скопированы');
   };

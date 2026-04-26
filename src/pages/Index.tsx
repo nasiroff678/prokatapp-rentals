@@ -9,6 +9,7 @@ import { AvailableTab } from '@/components/AvailableTab';
 import { WarehouseTab } from '@/components/WarehouseTab';
 import { ReportsTab } from '@/components/ReportsTab';
 import { StaffTab } from '@/components/StaffTab';
+import { ShiftTab } from '@/components/ShiftTab';
 import { useAuthStore } from '@/store/useAuthStore';
 import { 
   useEquipment, 
@@ -31,6 +32,7 @@ const tabTitles: Record<TabType, string> = {
   warehouse: 'Склад',
   reports: 'Отчёты',
   staff: 'Персонал',
+  shift: 'Смена',
 };
 
 const Index = () => {
@@ -169,6 +171,9 @@ const Index = () => {
               )}
               {activeTab === 'reports' && isAdmin && (
                 <ReportsTab orders={orders} />
+              )}
+              {activeTab === 'shift' && !isAdmin && (
+                <ShiftTab orders={orders} />
               )}
               {activeTab === 'staff' && isAdmin && (
                 <StaffTab />
