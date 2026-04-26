@@ -43,6 +43,7 @@ const mapOrder = (data: DbOrder & { equipment?: { name: string } }): Order => ({
   startTime: data.start_time,
   endTime: data.planned_end_time,
   status: data.status as 'active' | 'completed' | 'overdue',
+  documentImage: data.document_image_url || undefined,
 });
 
 // Keys
