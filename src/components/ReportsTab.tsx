@@ -1,5 +1,5 @@
 import { Order } from '@/types/equipment';
-import { BarChart3, TrendingUp, DollarSign, Clock, Calendar, X, Search, Download, ListTodo, ShieldAlert } from 'lucide-react';
+import { BarChart3, TrendingUp, DollarSign, Clock, Calendar, X, Search, Download, ListTodo, ShieldAlert, Package, User, Phone, CreditCard, Timer, Banknote, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { isToday, isThisMonth, parseISO, format } from 'date-fns';
 import { useActionLogs } from '@/hooks/useSupabase';
@@ -15,6 +15,7 @@ export function ReportsTab({ orders }: ReportsTabProps) {
   const [period, setPeriod] = useState<Period>('today');
   const [showDetails, setShowDetails] = useState(false);
   const [detailSearch, setDetailSearch] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   
   const { data: logs = [], isLoading: logsLoading } = useActionLogs();
 
@@ -254,7 +255,11 @@ export function ReportsTab({ orders }: ReportsTabProps) {
                <p className="text-center text-sm text-muted-foreground py-10">Ничего не найдено</p>
              ) : (
                displayOrders.map(o => (
-                 <div key={o.id} className="glass-card p-3 flex flex-col gap-1">
+                 <button
+                   key={o.id}
+                   onClick={() => setSelectedOrder(o)}
+                   className="glass-card p-3 flex flex-col gap-1 text-left w-full hover:bg-white/5 active:scale-[0.99] transition-all cursor-pointer"
+                 >
                    <div className="flex justify-between items-start">
                      <p className="text-sm font-semibold">{o.equipmentName}</p>
                      <p className="font-heading text-primary font-bold">{o.totalPrice} ₽</p>
@@ -263,12 +268,104 @@ export function ReportsTab({ orders }: ReportsTabProps) {
                      <span>{o.customerName} ({paymentLabels[o.paymentMethod]})</span>
                      <span>{format(new Date(o.startTime), 'dd.MM.yyyy HH:mm')}</span>
                    </p>
-                 </div>
+                 </button>
                ))
              )}
           </div>
         </div>
       )}
+
+      {selectedOrder && (
+        <div
+          className="fixed inset-0 z-[80] bg-background/95 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setSelectedOrder(null)}
+        >
+          <div
+            className="glass-card w-full sm:max-w-md max-h-[90vh] overflow-auto rounded-t-2xl sm:rounded-2xl p-5 space-y-4 border border-white/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold mb-1">Заказ</p>
+                <h2 className="font-heading text-lg font-bold leading-tight">{selectedOrder.equipmentName}</h2>
+                <p className="text-[10px] text-muted-foreground mt-1">ID: {selectedOrder.id}</p>
+              </div>
+              <button
+                onClick={() => setSelectedOrder(null)}
+                className="p-1 text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {selectedOrder.status === 'active' && (
+                <span className="text-[10px] uppercase font-bold px-2 py-1 rounded-md bg-timer-warning/20 text-timer-warning border border-timer-warning/30 flex items-center gap-1">
+                  <Timer className="w-3 h-3" /> Активный
+                </span>
+              )}
+              {selectedOrder.status === 'completed' && (
+                <span className="text-[10px] uppercase font-bold px-2 py-1 rounded-md bg-primary/20 text-primary border border-primary/30 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> Завершён
+                </span>
+              )}
+              {selectedOrder.status === 'overdue' && (
+                <span className="text-[10px] uppercase font-bold px-2 py-1 rounded-md bg-destructive/20 text-destructive border border-destructive/30 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" /> Просрочен
+                </span>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <DetailRow icon={User} label="Клиент" value={selectedOrder.customerName} />
+              <DetailRow icon={Phone} label="Телефон" value={selectedOrder.customerPhone || '—'} />
+              <DetailRow icon={Package} label="Оборудование" value={selectedOrder.equipmentName} />
+              <DetailRow icon={Clock} label="Длительность" value={`${selectedOrder.rentalHours} ч`} />
+              <DetailRow icon={Calendar} label="Начало" value={format(new Date(selectedOrder.startTime), 'dd.MM.yyyy HH:mm')} />
+              <DetailRow icon={Calendar} label="Окончание" value={format(new Date(selectedOrder.endTime), 'dd.MM.yyyy HH:mm')} />
+              <DetailRow icon={CreditCard} label="Оплата" value={paymentLabels[selectedOrder.paymentMethod]} />
+              <DetailRow icon={DollarSign} label="Цена/час" value={`${selectedOrder.pricePerHour.toLocaleString()} ₽`} />
+              <DetailRow icon={Banknote} label="Залог" value={`${selectedOrder.deposit.toLocaleString()} ₽`} />
+            </div>
+
+            <div className="border-t border-white/10 pt-3 flex items-center justify-between">
+              <span className="text-xs uppercase tracking-widest text-muted-foreground font-bold">Итого</span>
+              <span className="font-heading text-2xl font-bold text-primary">{selectedOrder.totalPrice.toLocaleString()} ₽</span>
+            </div>
+
+            {selectedOrder.documentImage && (
+              <div className="space-y-2">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Документ</p>
+                <img
+                  src={selectedOrder.documentImage}
+                  alt="Документ заказа"
+                  className="w-full rounded-xl border border-white/10"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 py-2 border-b border-white/5 last:border-b-0">
+      <div className="flex items-center gap-2 text-muted-foreground">
+        <Icon className="w-4 h-4" />
+        <span className="text-xs">{label}</span>
+      </div>
+      <span className="text-sm font-medium text-right">{value}</span>
     </div>
   );
 }
