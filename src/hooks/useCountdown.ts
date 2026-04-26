@@ -4,7 +4,6 @@ interface CountdownResult {
   hours: number;
   minutes: number;
   seconds: number;
-  seconds: number;
   isOverdue: boolean;
   isStarted: boolean;
   totalSeconds: number;
