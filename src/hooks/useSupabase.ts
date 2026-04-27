@@ -9,6 +9,9 @@ type DbEquipment = Database['public']['Tables']['equipment']['Row'];
 type DbOrder = Database['public']['Tables']['orders']['Row'];
 type DbStaff = Database['public']['Tables']['staff']['Row'];
 
+const DOCUMENTS_BUCKET = 'documents';
+const DOCUMENT_SIGNED_URL_TTL = 60 * 60;
+
 export interface Staff {
   id: string;
   name: string;
@@ -27,14 +30,58 @@ const mapEquipment = (data: DbEquipment): Equipment => ({
   image: data.image_url || undefined,
 });
 
-const mapOrder = (data: DbOrder & { equipment?: { name: string } }): Order => ({
+const getStoragePathFromDocumentValue = (value: string | null) => {
+  if (!value) return null;
+
+  if (!value.startsWith('http://') && !value.startsWith('https://')) {
+    return value;
+  }
+
+  try {
+    const url = new URL(value);
+    const path = decodeURIComponent(url.pathname);
+    const publicPrefix = `/storage/v1/object/public/${DOCUMENTS_BUCKET}/`;
+    const signedPrefix = `/storage/v1/object/sign/${DOCUMENTS_BUCKET}/`;
+
+    if (path.includes(publicPrefix)) {
+      return path.split(publicPrefix)[1] || null;
+    }
+
+    if (path.includes(signedPrefix)) {
+      return path.split(signedPrefix)[1] || null;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+};
+
+const resolveDocumentImageUrl = async (value: string | null) => {
+  if (!value) return undefined;
+
+  const storagePath = getStoragePathFromDocumentValue(value);
+  if (!storagePath) {
+    return value;
+  }
+
+  const { data, error } = await supabase.storage
+    .from(DOCUMENTS_BUCKET)
+    .createSignedUrl(storagePath, DOCUMENT_SIGNED_URL_TTL);
+
+  if (error || !data?.signedUrl) {
+    return value;
+  }
+
+  return data.signedUrl;
+};
+
+const mapOrder = async (data: DbOrder & { equipment?: { name: string } }): Promise<Order> => ({
   id: data.id,
   equipmentId: data.equipment_id,
   equipmentName: data.equipment?.name || 'Неизвестно',
   customerName: data.customer_name,
   customerPhone: data.customer_phone,
-  // We calculate rentalHours on the fly based on start and planned_end if needed, 
-  // but for the UI we'll just mock it or calculate it.
   rentalHours: Math.round((new Date(data.planned_end_time).getTime() - new Date(data.start_time).getTime()) / (1000 * 60 * 60)),
   pricePerHour: Math.round(data.total_price / Math.max(1, Math.round((new Date(data.planned_end_time).getTime() - new Date(data.start_time).getTime()) / (1000 * 60 * 60)))),
   totalPrice: data.total_price,
@@ -43,7 +90,7 @@ const mapOrder = (data: DbOrder & { equipment?: { name: string } }): Order => ({
   startTime: data.start_time,
   endTime: data.planned_end_time,
   status: data.status as 'active' | 'completed' | 'overdue',
-  documentImage: data.document_image_url || undefined,
+  documentImage: await resolveDocumentImageUrl(data.document_image_url),
 });
 
 // Keys
@@ -169,7 +216,7 @@ export function useOrders() {
         .select('*, equipment(name)')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data.map(mapOrder);
+      return Promise.all(data.map(mapOrder));
     },
   });
 }
@@ -205,11 +252,7 @@ export function useCreateOrder() {
 
         if (uploadError) throw uploadError;
 
-        const { data: publicUrlData } = supabase.storage
-          .from('documents')
-          .getPublicUrl(fileName);
-
-        document_image_url = publicUrlData.publicUrl;
+        document_image_url = fileName;
       }
 
       // Create order
