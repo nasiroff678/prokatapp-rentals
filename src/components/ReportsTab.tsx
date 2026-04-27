@@ -1,6 +1,6 @@
 import { Order } from '@/types/equipment';
-import { BarChart3, TrendingUp, DollarSign, Clock, Calendar, X, Search, Download, ListTodo, ShieldAlert, Package, User, Phone, CreditCard, Timer, Banknote, CheckCircle2, AlertCircle } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { BarChart3, TrendingUp, DollarSign, Clock, Calendar, X, Search, Download, ListTodo, ShieldAlert, Package, User, Phone, CreditCard, Timer, Banknote, CheckCircle2, AlertCircle, Maximize2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { isToday, isThisMonth, parseISO, format } from 'date-fns';
 import { useActionLogs } from '@/hooks/useSupabase';
 
@@ -16,6 +16,7 @@ export function ReportsTab({ orders }: ReportsTabProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [detailSearch, setDetailSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   
   const { data: logs = [], isLoading: logsLoading } = useActionLogs();
 
@@ -335,17 +336,163 @@ export function ReportsTab({ orders }: ReportsTabProps) {
 
             {selectedOrder.documentImage && (
               <div className="space-y-2">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Документ</p>
-                <img
-                  src={selectedOrder.documentImage}
-                  alt="Документ заказа"
-                  className="w-full rounded-xl border border-white/10"
-                />
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Документ</p>
+                  <button
+                    onClick={() => setFullscreenImage(selectedOrder.documentImage!)}
+                    className="flex items-center gap-1.5 text-xs font-bold text-primary px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 transition-colors"
+                  >
+                    <Maximize2 className="w-3.5 h-3.5" />
+                    Открыть
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFullscreenImage(selectedOrder.documentImage!)}
+                  className="block w-full group relative"
+                >
+                  <img
+                    src={selectedOrder.documentImage}
+                    alt="Документ заказа"
+                    className="w-full rounded-xl border border-white/10"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100">
+                    <Maximize2 className="w-8 h-8 text-white" />
+                  </div>
+                </button>
               </div>
             )}
           </div>
         </div>
       )}
+
+      {fullscreenImage && (
+        <ImageZoomViewer src={fullscreenImage} onClose={() => setFullscreenImage(null)} />
+      )}
+    </div>
+  );
+}
+
+function ImageZoomViewer({ src, onClose }: { src: string; onClose: () => void }) {
+  const [scale, setScale] = useState(1);
+  const [tx, setTx] = useState(0);
+  const [ty, setTy] = useState(0);
+  const dragRef = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null);
+  const pinchRef = useRef<{ dist: number; scale: number } | null>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  const reset = () => {
+    setScale(1);
+    setTx(0);
+    setTy(0);
+  };
+
+  const zoomIn = () => setScale((s) => Math.min(s * 1.4, 6));
+  const zoomOut = () => setScale((s) => Math.max(s / 1.4, 1));
+
+  const onWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = -e.deltaY * 0.002;
+    setScale((s) => Math.min(Math.max(s + s * delta, 1), 6));
+  };
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (scale <= 1) return;
+    (e.target as Element).setPointerCapture(e.pointerId);
+    dragRef.current = { x: e.clientX, y: e.clientY, tx, ty };
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    setTx(dragRef.current.tx + (e.clientX - dragRef.current.x));
+    setTy(dragRef.current.ty + (e.clientY - dragRef.current.y));
+  };
+  const onPointerUp = () => {
+    dragRef.current = null;
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      pinchRef.current = { dist: Math.hypot(dx, dy), scale };
+    }
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && pinchRef.current) {
+      e.preventDefault();
+      const dx = e.touches[0].clientX - e.touches[1].clientX;
+      const dy = e.touches[0].clientY - e.touches[1].clientY;
+      const dist = Math.hypot(dx, dy);
+      const next = pinchRef.current.scale * (dist / pinchRef.current.dist);
+      setScale(Math.min(Math.max(next, 1), 6));
+    }
+  };
+  const onTouchEnd = () => {
+    pinchRef.current = null;
+  };
+
+  const onDoubleClick = () => {
+    if (scale > 1) reset();
+    else setScale(2.5);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] bg-black/95 flex flex-col touch-none select-none">
+      <div className="flex items-center justify-between p-3 border-b border-white/10 bg-black/60 backdrop-blur-sm">
+        <span className="text-xs text-white/70 uppercase tracking-widest font-bold">
+          Документ • {Math.round(scale * 100)}%
+        </span>
+        <div className="flex items-center gap-1">
+          <button onClick={zoomOut} className="p-2 rounded-lg text-white hover:bg-white/10" title="Уменьшить">
+            <ZoomOut className="w-5 h-5" />
+          </button>
+          <button onClick={zoomIn} className="p-2 rounded-lg text-white hover:bg-white/10" title="Увеличить">
+            <ZoomIn className="w-5 h-5" />
+          </button>
+          <button onClick={reset} className="p-2 rounded-lg text-white hover:bg-white/10" title="Сбросить">
+            <RotateCcw className="w-5 h-5" />
+          </button>
+          <button onClick={onClose} className="p-2 rounded-lg text-white hover:bg-white/10 ml-1" title="Закрыть">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+      <div
+        className="flex-1 overflow-hidden flex items-center justify-center"
+        onWheel={onWheel}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onDoubleClick={onDoubleClick}
+        style={{ cursor: scale > 1 ? 'grab' : 'zoom-in' }}
+      >
+        <img
+          src={src}
+          alt="Документ"
+          draggable={false}
+          className="max-w-none transition-transform duration-75 ease-out"
+          style={{
+            transform: `translate(${tx}px, ${ty}px) scale(${scale})`,
+            maxHeight: '90vh',
+            maxWidth: '95vw',
+          }}
+        />
+      </div>
     </div>
   );
 }
