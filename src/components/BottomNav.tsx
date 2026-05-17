@@ -25,7 +25,7 @@ export function BottomNav({ activeTab, onTabChange, rentedCount, availableCount,
   // Сотрудник: видит «Смена», но НЕ видит «Отчёты» и «Персонал»
   const visibleTabs = tabs.filter(t => {
     if (isAdmin) return t.id !== 'shift';
-    return t.id !== 'reports' && t.id !== 'staff';
+    return t.id !== 'staff';
   });
 
   return (
