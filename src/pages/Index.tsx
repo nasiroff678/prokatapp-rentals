@@ -169,7 +169,7 @@ const Index = () => {
                   onDeleteEquipment={(id) => deleteEq(id)}
                 />
               )}
-              {activeTab === 'reports' && isAdmin && (
+              {activeTab === 'reports' && (
                 <ReportsTab orders={orders} />
               )}
               {activeTab === 'shift' && (
