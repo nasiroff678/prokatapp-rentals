@@ -30,7 +30,10 @@ export function BottomNav({ activeTab, onTabChange, rentedCount, availableCount,
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 glass-header safe-area-bottom">
-      <div className="flex items-center justify-around h-24 max-w-lg mx-auto px-2 pb-2">
+      <div
+        className="grid h-24 max-w-lg mx-auto px-1 pb-2 items-center gap-1"
+        style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, minmax(0, 1fr))` }}
+      >
         {visibleTabs.map(({ id, label, icon: Icon }) => {
           const isActive = activeTab === id;
           const badge = id === 'rented' ? rentedCount : id === 'available' ? availableCount : id === 'warehouse' ? warehouseCount : 0;
@@ -39,13 +42,13 @@ export function BottomNav({ activeTab, onTabChange, rentedCount, availableCount,
             <button
               key={id}
               onClick={() => onTabChange(id)}
-              className={`relative flex flex-col items-center justify-center gap-1.5 flex-1 min-w-0 h-20 rounded-2xl transition-colors duration-300 ${
+              className={`relative flex min-w-0 flex-col items-center justify-center gap-1 h-20 rounded-xl transition-colors duration-300 sm:gap-1.5 sm:rounded-2xl ${
                 isActive ? 'text-primary' : 'text-muted-foreground'
               }`}
             >
-              <div className="relative z-10 flex flex-col items-center justify-center gap-1.5 px-1">
+              <div className="relative z-10 flex min-w-0 flex-col items-center justify-center gap-1 px-0.5 sm:gap-1.5 sm:px-1">
                 <div className="relative">
-                  <Icon className={`w-7 h-7 transition-transform duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_6px_rgba(20,185,129,0.6)]' : ''}`} strokeWidth={2.2} />
+                  <Icon className={`h-6 w-6 transition-transform duration-300 sm:h-7 sm:w-7 ${isActive ? 'scale-110 drop-shadow-[0_0_6px_rgba(20,185,129,0.6)]' : ''}`} strokeWidth={2.2} />
                   {badge > 0 && (
                     <motion.span 
                       initial={{ scale: 0 }}
@@ -56,7 +59,9 @@ export function BottomNav({ activeTab, onTabChange, rentedCount, availableCount,
                     </motion.span>
                   )}
                 </div>
-                <span className="text-[12px] font-semibold tracking-tight whitespace-nowrap">{label}</span>
+                <span className="max-w-full text-center text-[10px] font-semibold leading-none tracking-tight sm:text-[12px]">
+                  {label}
+                </span>
               </div>
               
               {isActive && (
